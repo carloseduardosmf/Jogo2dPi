@@ -23,6 +23,7 @@ public class Fase extends JPanel implements ActionListener {
 	private Player player;
 	private Timer timer;
 	private List <Enemy1> enemy1;
+	private List <Chefe> chefe;
 	public boolean emJogo;
 	private boolean gameOver;
 
@@ -44,6 +45,7 @@ public class Fase extends JPanel implements ActionListener {
 		timer.start();
 		
 		inicializaInimigos();
+		inicialzarBoss();
 		emJogo = true;
 
 	}
@@ -60,6 +62,23 @@ public class Fase extends JPanel implements ActionListener {
 			
 		
 	}
+	
+	
+	//INICIALIZANDO O BOSS 
+	public void inicialzarBoss() {
+		int coordenadasChefe [] = new int[4];
+		chefe = new ArrayList<Chefe>();
+		
+		for(int c = 0; c < coordenadasChefe.length; c++) {
+			int x = (int) (Math.random() * 5000 + 1080);
+			int y = (int) (Math.random() * 600 + 300);
+			
+			chefe.add(new Chefe(x,y));
+		}
+		
+		
+		
+	}
 
 	public void paint(Graphics g) {
 
@@ -73,6 +92,13 @@ public class Fase extends JPanel implements ActionListener {
 			Tiro m = tiros.get(i);
 			m.load();
 			graficos.drawImage(m.getImagem(), m.getX(), m.getY(), this);
+		}
+		
+		// DESENHANDO O BOSS NA TELA
+		for(int c = 0; c < chefe.size(); c++) {
+			Chefe d = chefe.get(c);
+			d.load();
+			graficos.drawImage(d.getImagem(), d.getX(), d.getY(), null);
 		}
 
 		for (int o = 0; o < enemy1.size(); o++) {
@@ -96,8 +122,11 @@ public class Fase extends JPanel implements ActionListener {
 		public void reinicializarjogo() {
 			player = new Player();
 			player.load();
-			
+		
 			enemy1.clear();
+			
+			chefe.clear();
+			
 			inicializaInimigos();
 			
 			emJogo = true;
@@ -124,6 +153,15 @@ public class Fase extends JPanel implements ActionListener {
 				enemy1.remove(o);
 			}
 		}
+		
+		for(int c = 0; c <  chefe.size(); c++ ) {
+			Chefe d = chefe.get(c);
+			if(d.isVisivel()) {
+				d.update();
+			} else {
+				chefe.remove(c);
+			}
+		}
 			
 		checarColisoes();
 		
@@ -136,6 +174,7 @@ public class Fase extends JPanel implements ActionListener {
 			Rectangle formaNave = player.getBounds();
 			Rectangle formaTiro;
 			Rectangle formaEnemy1;
+			Rectangle formaChefe;
 			
 			for (int i = 0; i < enemy1.size(); i++) {
 				Enemy1 tempEnemy1 = enemy1.get(i);
@@ -157,10 +196,32 @@ public class Fase extends JPanel implements ActionListener {
 				for (int o = 0; o < enemy1.size(); o++) {
 					Enemy1 tempEnemy1 = enemy1.get(o);
 					formaEnemy1 = tempEnemy1.getBounds();
+					Chefe tempChefe = chefe.get(0);
+					formaChefe = tempChefe.getBounds();
 					
-					if(formaTiro.intersects(formaEnemy1)) {
+					if(formaTiro.intersects(formaEnemy1) ) {
 						tempEnemy1.setVisivel(false);
 						tempTiro.setVisivel(false);
+					}
+					if(formaTiro.intersects(formaChefe)) {
+						tempChefe.setVisivel(false);
+						tempTiro.setVisivel(false);
+					}
+				}
+				
+				for(int c = 0; c < chefe.size(); c++) {
+					Chefe tempChefe = chefe.get(c);
+					formaChefe = tempChefe.getBounds();
+					Enemy1 tempEnemy1 = enemy1.get(c);
+					formaEnemy1 = tempEnemy1.getBounds();
+					
+					if(formaNave.intersects(formaChefe)) {
+						player.setVisvel(false);
+						tempChefe.setVisivel(false);
+						tempEnemy1.setVisivel(false);
+						emJogo = false;
+					
+						
 					}
 				}
 				
